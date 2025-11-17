@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd backend && npm start",
-    "client": "cd frontend && npm run dev"
+    "client": "cd frontend && npm run build"
   },
   "devDependencies": {
     "concurrently": "^7.6.0"
@@ -15,5 +15,4 @@
   "keywords": [],
   "author": "",
   "license": "ISC"
-  
 }

@@ -1,0 +1,10 @@
+# Ignorar node_modules en TODAS las carpetas
+**/node_modules/
+
+# Ignorar .env en todas las carpetas
+**/.env
+**/.env.local
+
+# Ignorar builds
+**/dist/
+**/build/
