@@ -1,10 +1,19 @@
 {
-    "scripts": {
-        "start": "concurrently \"npm run server\" \"npm run client\"",
-        "server": "cd backend && npm start",
-        "client": "cd frontend && npm run dev"
-    },
-    "devDependencies": {
-        "concurrently": "^7.6.0"
-    }
+  "name": "coinxchange-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm start",
+    "client": "cd frontend && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+  
 }
