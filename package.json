@@ -11,12 +11,12 @@
     "install:all": "npm run install:frontend && npm run install:backend",
 
     "build:frontend": "cd frontend && npm run build",
-    "build:backend": "cd backend && npm start",
+    "build:backend": "cd api && npm start",
     "build:all": "npm run build:backend && npm run build:frontend",
     "build": "npm run install:all && npm run build:all",
 
     "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd backend && npm start",
+    "server": "cd api && npm start",
     "client": "cd frontend && npm run dev"
   },
   "devDependencies": {
