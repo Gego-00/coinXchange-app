@@ -51,3 +51,4 @@ app.post("/api/convert", async (req, res) => {
 //! Start the server 
 app.listen(PORT, console.log(`Server is running on PORT ${PORT}...`));
 
+module.exports = app;
