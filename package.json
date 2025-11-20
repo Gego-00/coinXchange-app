@@ -12,6 +12,7 @@
 
     "build:frontend": "cd frontend && npm run build",
     "build": "npm run install:all && npm run build:frontend",
+    "start-serv": "npm run install:backend && npm run server",
 
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd api && npm start",

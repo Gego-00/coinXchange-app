@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const cors = require("cors");
@@ -50,5 +51,3 @@ app.post("/api/convert", async (req, res) => {
 
 //! Start the server 
 app.listen(PORT, console.log(`Server is running on PORT ${PORT}...`));
-
-module.exports = app;
