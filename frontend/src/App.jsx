@@ -3,6 +3,7 @@ import axios from "axios";
 import "./currencyConverter.css";
 
 function App() {
+  const API_URL = "https://coinxchange-api.vercel.app/"
   const [formData, setFormData] = useState({
     from: "",
     to: "",
@@ -26,7 +27,7 @@ function App() {
     //Http Request
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/convert",
+        API_URL,
         formData
       );
       console.log(response);
