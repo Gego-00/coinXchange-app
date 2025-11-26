@@ -1,105 +1,138 @@
-const axios = require('axios');
+import React, { useState } from "react";
+import axios from "axios";
 
-const API_URL = 'https://v6.exchangerate-api.com/v6';
-const API_KEY = process.env.EXCHANGE_RATE_API_KEY;
+function CurrencyConverter() {
+  const [formData, setFormData] = useState({
+    from: "",
+    to: "",
+    amount: "",
+  });
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-const ALLOWED_ORIGINS = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
-].filter(Boolean);
+  const currencyCodes = ["USD", "EUR", "GBP", "GHS", "JPY", "CAD", "BSD"];
 
-function setCorsHeaders(req, res) {
-  const origin = req.headers.origin;
-  
-  if (ALLOWED_ORIGINS.includes(origin) || origin?.includes('vercel.app')) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-}
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
-export default async function handler(req, res) {
-  setCorsHeaders(req, res);
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ 
-      message: 'Method not allowed',
-      allowedMethods: ['POST']
-    });
-  }
-
-  try {
-    if (!API_KEY) {
-      return res.status(500).json({
-        message: 'Server configuration error',
-        details: 'API key not configured'
-      });
-    }
-
-    const { from, to, amount } = req.body;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    console.log('Conversion request:', { from, to, amount });
-
-    if (!from || !to || !amount) {
-      return res.status(400).json({
-        message: 'Missing required parameters',
-        required: ['from', 'to', 'amount']
-      });
+    if (!formData.from || !formData.to || !formData.amount) {
+      setError("Por favor completa todos los campos");
+      return;
     }
 
-    const numAmount = parseFloat(amount);
-    if (isNaN(numAmount) || numAmount <= 0) {
-      return res.status(400).json({
-        message: 'Invalid amount',
-        details: 'Amount must be a positive number'
-      });
+    if (formData.amount <= 0) {
+      setError("El monto debe ser mayor a 0");
+      return;
     }
 
-    const url = `${API_URL}/${API_KEY}/pair/${from}/${to}/${numAmount}`;
-    console.log('API URL:', url);
+    setLoading(true);
+    setError("");
+    setResult(null);
 
-    const response = await axios.get(url);
-
-    if (response.data && response.data.result === 'success') {
-      return res.status(200).json({
-        base: from,
-        target: to,
-        conversionRate: response.data.conversion_rate,
-        convertedAmount: response.data.conversion_result,
-        amount: numAmount
+    try {
+      // ✅ Ruta relativa - funciona en dev y producción
+      const response = await axios.post("/api/convert", {
+        from: formData.from,
+        to: formData.to,
+        amount: parseFloat(formData.amount)
       });
-    } else {
-      return res.status(400).json({
-        message: 'Error converting currency',
-        details: response.data
-      });
+      
+      console.log("✅ Respuesta:", response.data);
+      setResult(response.data);
+      
+    } catch (error) {
+      console.error("❌ Error:", error);
+      
+      if (error.response) {
+        setError(
+          error.response.data?.message || 
+          error.response.data?.details ||
+          `Error: ${error.response.status}`
+        );
+      } else if (error.request) {
+        setError("No se pudo conectar con el servidor");
+      } else {
+        setError(error.message || "Error desconocido");
+      }
+    } finally {
+      setLoading(false);
     }
+  };
 
-  } catch (error) {
-    console.error('Conversion error:', error);
-
-    if (error.response) {
-      return res.status(error.response.status || 500).json({
-        message: 'External API error',
-        details: error.response.data || error.message
-      });
-    } else if (error.request) {
-      return res.status(503).json({
-        message: 'Service unavailable',
-        details: 'Could not reach currency conversion service'
-      });
-    } else {
-      return res.status(500).json({
-        message: 'Error converting currency',
-        details: error.message
-      });
-    }
-  }
+  return (
+    <div>
+      <section className="hero">
+        <h1>Global Currency Converter</h1>
+        <p>Real-time currency conversions worldwide</p>
+      </section>
+      
+      <section className="converter">
+        <form onSubmit={handleSubmit}>
+          <select
+            name="from"
+            value={formData.from}
+            onChange={handleChange}
+            disabled={loading}
+            required
+          >
+            <option value="">Select From Currency</option>
+            {currencyCodes.map((code) => (
+              <option key={code} value={code}>{code}</option>
+            ))}
+          </select>
+          
+          <select
+            name="to"
+            value={formData.to}
+            onChange={handleChange}
+            disabled={loading}
+            required
+          >
+            <option value="">Select To Currency</option>
+            {currencyCodes.map((code) => (
+              <option key={code} value={code}>{code}</option>
+            ))}
+          </select>
+          
+          <input
+            name="amount"
+            value={formData.amount}
+            onChange={handleChange}
+            placeholder="Amount"
+            type="number"
+            disabled={loading}
+            required
+            min="0.01"
+            step="0.01"
+          />
+          
+          <button type="submit" disabled={loading}>
+            {loading ? "Converting..." : "Convert"}
+          </button>
+        </form>
+        
+        {result && (
+          <div className="result">
+            <p>
+              {result.amount} {result.base} = {result.convertedAmount} {result.target}
+            </p>
+            <p>Rate: 1 {result.base} = {result.conversionRate} {result.target}</p>
+          </div>
+        )}
+        
+        {error && <p className="error">{error}</p>}
+      </section>
+    </div>
+  );
 }
+
+export default CurrencyConverter;
